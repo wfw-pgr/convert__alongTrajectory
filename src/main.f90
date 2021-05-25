@@ -118,7 +118,7 @@ contains
        ds(a_,ik)      = sqrt( ds(x_,ik)**2 + ds(y_,ik)**2 )
        slength(ik+1)  = slength(ik) + ds(a_,ik)
     enddo
-    ds(ntrajectory,:) = ds(ntrajectory-1,:)
+    ds(:,ntrajectory) = ds(:,ntrajectory-1)
     
     ! ------------------------------------------------------ !
     ! --- [2] closest point                              --- !

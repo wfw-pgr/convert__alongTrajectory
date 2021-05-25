@@ -36,17 +36,31 @@ def convert__alongTrajectory():
 
     #  -- [2-3] make xy-coordinate of trajectory    --  #
     nc_MinMaxNum = [ -0.2, +0.2, 21 ]
+    zc_MinMaxNum = [ -0.1, +0.1, 11 ]
     ncoord       = np.linspace( nc_MinMaxNum[0], nc_MinMaxNum[1], nc_MinMaxNum[2] )
+    zcoord       = np.linspace( zc_MinMaxNum[0], zc_MinMaxNum[1], zc_MinMaxNum[2] )
     Ls           = traj_ref.shape[0]
     Ln           = ncoord.shape[0]
-    traj_inP_xy  = np.zeros( (Ln,Ls,3) )
-    for inc,Anc in enumerate(ncoord):
-        traj_inP_xy[inc,:,:] = np.copy( traj_ref ) + Anc*nvec
+    Lz           = zc_MinMaxNum[2]
+    traj_inP_xy  = np.zeros( (Lz,Ln,Ls,3) )
+    for izc,zval in enumerate(zcoord):
+        for inc,Anc in enumerate(ncoord):
+            traj_inP_xy[izc,inc,:,:] = np.copy( traj_ref ) + Anc*nvec
+        traj_inP_xy[izc,:,:,2] = zval
 
     #  -- [2-4] make sn-coordinate of trajectory    --  #
-    sco,nco      = np.meshgrid( slen, ncoord, indexing="xy" )
-    zco          = np.zeros_like(sco)
+    # sco,nco,     = np.meshgrid( slen, ncoord, indexing="xy" )
+    # print( sco.shape, nco.shape )
+    zco,nco, sco   = np.meshgrid( zcoord, ncoord, slen, indexing="ij" )
+    print( sco.shape, nco.shape,zco.shape )
+    # print( sco.shape, nco.shape, zco.shape )
+    sys.exit()
+    # zco          = np.zeros_like(sco)
     traj_inP_sn  = np.concatenate( [sco[:,:,None],nco[:,:,None],zco[:,:,None]], axis=2 )
+    
+    # outFile      = "dat/traj_inP_xy.dat"
+    # import nkUtilities.save__pointFile as spf
+    # spf.save__pointFile( outFile=outFile, Data=traj_inP_xy )
 
     # outFile      = "dat/traj_inP_sn.dat"
     # import nkUtilities.save__pointFile as spf
