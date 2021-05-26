@@ -18,6 +18,10 @@ def convert__alongTrajectory():
     inpFile  = "dat/trajectory_reference.dat"
     import nkUtilities.load__pointFile as lpf
     traj_ref = lpf.load__pointFile( inpFile=inpFile, returnType="point" )
+
+    cnsFile = "dat/parameter.conf"
+    import nkUtilities.load__constants as lcn
+    const = lcn.load__constants( inpFile=cnsFile )
     
     # ------------------------------------------------- #
     # --- [2] coordinate to be interpolated         --- #
@@ -35,13 +39,13 @@ def convert__alongTrajectory():
     nvec[:,2]    =   0.0
 
     #  -- [2-3] make xy-coordinate of trajectory    --  #
-    nc_MinMaxNum = [ -0.2, +0.2, 21 ]
-    zc_MinMaxNum = [ -0.1, +0.1, 11 ]
-    ncoord       = np.linspace( nc_MinMaxNum[0], nc_MinMaxNum[1], nc_MinMaxNum[2] )
-    zcoord       = np.linspace( zc_MinMaxNum[0], zc_MinMaxNum[1], zc_MinMaxNum[2] )
+    nc_MinMaxNum = const["nc_MinMaxNum"]
+    zc_MinMaxNum = const["zc_MinMaxNum"]
+    ncoord       = np.linspace( nc_MinMaxNum[0], nc_MinMaxNum[1], int(nc_MinMaxNum[2]) )
+    zcoord       = np.linspace( zc_MinMaxNum[0], zc_MinMaxNum[1], int(zc_MinMaxNum[2]) )
     Ls           = traj_ref.shape[0]
     Ln           = ncoord.shape[0]
-    Lz           = zc_MinMaxNum[2]
+    Lz           = int( zc_MinMaxNum[2] )
     traj_inP_xy  = np.zeros( (Lz,Ln,Ls,3) )
     for izc,zval in enumerate(zcoord):
         for inc,Anc in enumerate(ncoord):
