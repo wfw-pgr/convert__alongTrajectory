@@ -49,22 +49,8 @@ def convert__alongTrajectory():
         traj_inP_xy[izc,:,:,2] = zval
 
     #  -- [2-4] make sn-coordinate of trajectory    --  #
-    # sco,nco,     = np.meshgrid( slen, ncoord, indexing="xy" )
-    # print( sco.shape, nco.shape )
     zco,nco, sco   = np.meshgrid( zcoord, ncoord, slen, indexing="ij" )
-    print( sco.shape, nco.shape,zco.shape )
-    # print( sco.shape, nco.shape, zco.shape )
-    sys.exit()
-    # zco          = np.zeros_like(sco)
-    traj_inP_sn  = np.concatenate( [sco[:,:,None],nco[:,:,None],zco[:,:,None]], axis=2 )
-    
-    # outFile      = "dat/traj_inP_xy.dat"
-    # import nkUtilities.save__pointFile as spf
-    # spf.save__pointFile( outFile=outFile, Data=traj_inP_xy )
-
-    # outFile      = "dat/traj_inP_sn.dat"
-    # import nkUtilities.save__pointFile as spf
-    # spf.save__pointFile( outFile=outFile, Data=traj_inP_sn )
+    traj_inP_sn    = np.concatenate( [sco[:,:,:,None],nco[:,:,:,None],zco[:,:,:,None]], axis=3 )
     
     # ------------------------------------------------- #
     # --- [3] interpolation                         --- #
@@ -82,13 +68,9 @@ def convert__alongTrajectory():
         bf[:,ik]  = np.copy( ret[:,3] )
         
     #  -- [3-2] combine with sn-coordinate          --  #
-    bf = np.reshape( bf, (Ln,Ls,3) )
-    b_along  = np.concatenate( [traj_inP_sn,traj_inP_xy,bf], axis=2 )
+    bf = np.reshape( bf, (Lz,Ln,Ls,3) )
+    b_along  = np.concatenate( [traj_inP_sn,traj_inP_xy,bf], axis=3 )
     
-    # outFile   = "dat/bfield_ref_sn.dat"
-    # import nkUtilities.save__pointFile as spf
-    # spf.save__pointFile( outFile=outFile, Data=b_along )
-
     # ------------------------------------------------- #
     # --- [4] desired coordinate in xy              --- #
     # ------------------------------------------------- #
@@ -113,78 +95,31 @@ def convert__alongTrajectory():
     import nkUtilities.load__pointFile as lpf
     coord_sn    = lpf.load__pointFile( inpFile=inpFile, returnType="point" )
 
-    # print( "Max, Min ( grid )" )
-    # print( np.min( coord_sn[:,0] ), np.max( coord_sn[:,0] ) )
-    # print( np.min( coord_sn[:,1] ), np.max( coord_sn[:,1] ) )
-    
-    # print( "Max, Min ( ref )" )
-    # print( np.min( b_along[:,0] ), np.max( b_along[:,0] ) )
-    # print( np.min( b_along[:,1] ), np.max( b_along[:,1] ) )
-    
-    #  -- [4-2] prepare grid to be interpolated     --  #
-    # import nkUtilities.equiSpaceGrid as esg
-    # x1MinMaxNum = [  0.6,  0.8,  21 ]
-    # x2MinMaxNum = [ -0.8, -0.6,  21 ]
-    # x3MinMaxNum = [  0.0,  0.0,   1 ]
-    # coord_xy    = esg.equiSpaceGrid( x1MinMaxNum=x1MinMaxNum, x2MinMaxNum=x2MinMaxNum, \
-    #                                  x3MinMaxNum=x3MinMaxNum, returnType = "point" )
-
-    # #  -- [4-3] prepare grid to be interpolated     --  #
-    # import convert__trajectoryCoordinate as ctc
-    # ret         = ctc.convert__trajectoryCoordinate( trajectory=trajectory, coord_xy=coord_xy )
-    # print( ret.shape )
 
     # ------------------------------------------------- #
     # --- [5] interpolation on to new coordinate    --- #
     # ------------------------------------------------- #
-    gridData            = np.zeros( (b_along.shape[0],b_along.shape[1],3) )
-    gridData[:,:,0:2]   = np.copy( b_along[:,:,0:2] )
-    pointData           = np.zeros( (coord_sn.shape[0],3) )
-    pointData[:,0:2]    = np.copy ( coord_sn[:,0:2] )
-    field               = np.zeros( (coord_sn.shape[0],3) )
-    # gridData[:,:,:,0:3] = np.repeat( np.copy ( b_along[:,:,0:3] )[None,:,:,:], 5, axis=0 )
-    # gridData            = np.zeros( (5,b_along.shape[0],b_along.shape[1],4) )
-    # pointData           = np.zeros( (coord_sn.shape[0],4) )
-    # gridData[:,:,:,0:3] = np.repeat( np.copy ( b_along[:,:,0:3] )[None,:,:,:], 5, axis=0 )
-    # gridData[]
-    # pointData           = np.zeros( (coord_sn.shape[0],4) )
-    # pointData[:,0:3]    = np.copy ( coord_sn )
-    for ik in range(3):
 
-        # gridData[:,:,:,3] = np.copy( b_along[:,:,6+ik] )
-        gridData[:,:,2]   = np.copy( b_along[:,:,6+ik] )
-        pointData_        = np.copy( pointData )
-
-        outFile   = "dat/gridData.dat"
-        import nkUtilities.save__pointFile as spf
-        spf.save__pointFile( outFile=outFile, Data=gridData )
-
-        outFile   = "dat/pointData.dat"
-        import nkUtilities.save__pointFile as spf
-        spf.save__pointFile( outFile=outFile, Data=pointData_ )
-
-        # print( np.min( gridData[:,:,:,3] ), np.max( gridData[:,:,:,3] )  )
-        print( gridData.shape )
-        print( pointData_.shape )
-        # print( np.min( gridData[:,:,:,0] ), np.max( gridData[:,:,:,0] )  )
-        # print( np.min( gridData[:,:,:,1] ), np.max( gridData[:,:,:,1] )  )
-        # print( np.min( pointData_[:,0] ), np.max( pointData_[:,0] )  )
-        # print( np.min( pointData_[:,1] ), np.max( pointData_[:,1] )  )
-        import nkInterpolator.interpolate__bilinear as bil
-        ret = bil.interpolate__bilinear( gridData=gridData, pointData=pointData_ )
-        # ret               = itc.interpolate__tricubic( gridData=gridData, pointData=pointData_ )
-        field[:,ik]       = np.copy( ret[:,2] )
-        print( np.min( ret[:,2] ), np.max( ret[:,2] ) )
+    Flag3d = True
+    if ( Flag3d ):
+        gridData            = np.zeros( (b_along.shape[0],b_along.shape[1],b_along.shape[2],4) )
+        gridData[:,:,:,0:3] = np.copy( b_along[:,:,:,0:3] )
+        pointData           = np.zeros( (coord_sn.shape[0],4) )
+        pointData[:,0:3]    = np.copy ( coord_sn[:,0:3] )
+        field               = np.zeros( (coord_sn.shape[0],3) )
+        
+        for ik in range(3):
+            gridData[:,:,:,3]  = np.copy( b_along[:,:,:,6+ik] )
+            pointData_         = np.copy( pointData )
+            ret                = itc.interpolate__tricubic( gridData=gridData, pointData=pointData_ )
+            field[:,ik]        = np.copy( ret[:,3] )
+            
     
     # ------------------------------------------------- #
     # --- [6] associate with xyz grid               --- #
     # ------------------------------------------------- #
     field     = np.reshape( field, (-1,3) )
     field_xyz = np.concatenate( [coord_xy,field], axis=1 )
-    # print( coord_xy.shape, field.shape, field_snz.shape )
-    # print( np.min( field[:,0] ), np.max( field[:,0] ) )
-    # print( np.min( field[:,1] ), np.max( field[:,1] ) )
-    # print( np.min( field[:,2] ), np.max( field[:,2] ) )
 
     outFile   = "dat/field_xyz.dat"
     import nkUtilities.save__pointFile as spf

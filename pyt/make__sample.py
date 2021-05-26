@@ -104,7 +104,7 @@ def make__inputGrid():
     import nkUtilities.equiSpaceGrid as esg
     x1MinMaxNum = [  0.6,  0.8,  21 ]
     x2MinMaxNum = [ -0.8, -0.6,  21 ]
-    x3MinMaxNum = [  0.0,  0.0,   1 ]
+    x3MinMaxNum = [ -0.01, 0.01, 11 ]
     grid        = esg.equiSpaceGrid( x1MinMaxNum=x1MinMaxNum, x2MinMaxNum=x2MinMaxNum, \
                                      x3MinMaxNum=x3MinMaxNum, returnType = "point" )
     outFile   = "dat/coord_xy.dat"
